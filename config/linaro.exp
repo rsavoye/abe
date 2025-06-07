@@ -1,4 +1,6 @@
 # The master configuration file should be here
+# FIXME: this is probably out of date, so it's only
+# here as an example
 
 global env
 if {[info exists env(PREFIX_UNDER_TEST)]} {
