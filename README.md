@@ -1,46 +1,50 @@
-                        README
+# Advanced Build Environment (ABE)
 
-Abe is a bourne shell rewrite of the existing Cbuildv1 system as
-used by Linaro. While being oriented to the Linaro way of doing
-things, Abe should be usable by others by just reconfiguring.
+ABE is a bourne shell rewrite of the original Cbuildv1 system used by
+Linaro. Bourne shell was used as Cbuildv was a collection of Makefiles
+so it was possible to build on the older code. I noticed recently that
+ABE has not been maintained by Linaro for many years, so as the
+original author and primary developer I'm going to maintain this fork
+and use upstream versions of all the code instead of the very out of
+date Linaro versions.
 
-Configuring Abe:
----------------------
-  While it is possible to run Abe from it's source tree, this
+ABE is a complicated program using many advanced bourne shell
+features, and looks a bit like C code as most library functions return
+a value and or a data structure. To build a cross toolchain, or
+crazier a Canadian Cross (Windows hosted cross compiler built on
+Linux) is a complicated process and each step must be done in the
+right order with the right options. ABE buries all this complexity so
+it's relatively easy to buiild a cross compiler for Linux, Android, or
+base metal.
+
+## Configuring ABE
+
+While it is possible to run ABE from it's source tree, this
 isn't recommended. The best practice is to create a new build
 directory, and configure Abe in that directory. That makes it
 easy to change branches, or even delete subdirectories. There
 are defaults for all paths, which is to create them under the same
 directory configure is run in.
 
-  There are several directories that Abe needs. These are the
-following:
+There are several directories that ABE needs. These will be created
+when you run ABE. These are the following:
 
-  * local snapshots - This is where all the downloaded sources get
-    stored. The default is the current directory under snapshots.
-  * local build - This is where all the executables get built. The
-    default is to have builds go in a top level directory which is the
-    full hostname of the build machine. Under this a directory is
-    created for the target architecture.
-  * remote snapshots - This is where remote tarballs are stored. This
-    currently defaults to abe.validation.linaro.org, which is
-    accessible via HTTP to the general public.
+* snapshots - This is where all the downloaded sources get
+stored. The default is the current directory under snapshots.
+* sysroots - This is the sysroot for the target
+* builds - This is where all the executables get built. The
+default is to have builds go in a top level directory which is the
+full hostname of the build machine. Under this a directory is
+created for the target architecture.
 
-  If configure is executed without any parameters. the defaults are
+If configure is executed without any parameters. the defaults are
 used. It is also possible to change those values at configure
 time. For example:
 
-$ABE-PATH/configure
---with-local-snapshots=$ABE_PATH/snapshots 
---with-local-builds=$ABE-PATH/destdir
---with-remote-snapshots=abe@toolchain64.lab:/home/abe/var/snapshots/
+You can execute ./configure --help to get the full list of configure
+time parameters.
 
-  This changes the 3 primary paths, including changing the remote host
-to use rsync or ssh to download tarballs instead of HTTP. You can
-execute ./configure --help to get the full list of configure time
-parameters.
-
-  The configure process produces a host.conf file, with the default
+The configure process produces a host.conf file, with the default
 settings. This file is read by abe at runtime, so it's possible to
 change the values and rerun abe.sh to use the new values. Each
 toolchain component also has a config file. The default version is
@@ -55,9 +59,9 @@ configure time. For example:
 
 	  head ${hostname}/${target}/${component}/config.log
 
-Default Behaviours:
-------------------
-  There are several behaviours that may not be obvious, so they're
+## Default Behaviours
+
+There are several behaviours that may not be obvious, so they're
 documented here. One relates to GCC builds. When built natively, GCC
 only builds itself once, and is fully functional. When cross
 compiling, this works differently. A fully functional GCC can't be
@@ -66,15 +70,15 @@ library. This is called stage1. This is then used to compiler the C
 library. One this library is installed, then stage2 of GCC can be
 built.
 
-  When building an entire toolchain using the 'all' option to --build,
+When building an entire toolchain using the 'all' option to --build,
 all components are built in the correct order, including both GCC
 stages. It is possible to specify building only GCC, in this case the
 stage1 configure flags are used if the C library isn't installed. If
 the C library is installed, then the stage2 flags are used. A message
 is displayed to document the automatic configure decision.
 
-Specifying the source works like this:
--------------------------------------
+## Specifying the source works like this
+
 It's possible to specify a full tarball name, minus the compression
 part, which will be found dynamically. If the word 'tar' appears in
 the suppplied name, it's only looked for on the remote directory. If
@@ -96,168 +100,54 @@ host, and contains the other packages needed to build GCC, like
 gmp. Snapshots is the primary location of all source tarballs. To list
 all the available snapshots, you can do this"
 
-    "abe.sh --list snapshots".
+    abe.sh --list snapshots
 
 To build a specific component, use the --build option to
 abe. the --target option is also used for cross builds. For
 example:
 
-"abe.sh --target arm-linux-gnueabihf gcc-linaro-4.8.2013.07-1"
+	abe.sh --build gcc --target aarch64-linux-android
 
 This would fetch the source tarball for this release, build anything
 it needs to compile, the binutils for example, and then build these
 sources. You can also specify a URL to a source repository
 instead. For example:
 
-"abe.sh --target arm-linux-gnueabihf git://git.linaro.org/toolchain/eglibc.git"
+	abe.sh --target arm-linux-gnueabihf git://git.linaro.org/toolchain/eglibc.git
 
 To build an entire cross toolchain, the simplest way is to let
-abe control all the steps. Although it is also possible to do each
+ABE control all the steps. Although it is also possible to do each
 step separately. To build the full toolchain, do this:
 
-"abe.sh --target arm-linux-gnueabihf --build all"
+	abe.sh --target arm-linux-gnueabihf --build all
 
----------------------------------------------------------------------
-Older NOTES
+## Features
 
-x86_64-linux-gnu
-arm-linux-gnueabi
-arm-linux-gnueabihf
-armeb-linux-gnueabihf
-aarch64-linux-gnu
-aarch64-none-elf
-aarch64_be-none-elf
-aarch64_be-linux-gnu
+* Ability to mix & match all toolchain components
+* Test locally or remotely
+* Builds cross compilers
+* Can build a cross toolchain for Android
+* Can build Windows hosted cross compilers on Linux
+* Builds binary release tarballs
 
-Toolchain Components
- * gcc (gcc, g++, objc, fortran)
- * gas
- * ld (gold)
- * libc (newlib,eglibc,glibc)
- * dependant libs (gmp, mpc, mpfr)
+## abe.sh command line arguments:
 
-Build with stock Ubuntu toolchains
- * Linaro GCC Maintenance (currently Linaro GCC 4.7)
- * FSF GCC Previous (currently FSF GCC 4.7)
- * FSF GCC Current (currently FSF GCC 4.8)
+* --build (architecture for the build machine, default native)
+* --target (architecture for the target machine, default native)
+* --snapshots XXX (URL of remote host or local directory)
+* --libc {newlib,eglibc,glibc} (C library to use)
+* --list {gcc,binutils,libc} (list possible values for component versions)
+* --set {gcc,binutils,libc,latest}=XXX (change config file setting)
+* --binutils (binutils version to use, default $PATH)
+* --gcc (gcc version to use, default $PATH)
+* --config XXX (alternate config file)
+* --clean (clean a previous build, default is to start where it left off)
+* --dispatch (run on LAVA build farm, probably remote)
+* --sysroot XXX (specify path to alternate sysroot)
 
-Build with trunk/master
- * Linaro GCC Development (currently Linaro GCC 4.8)
- * FSF GCC Trunk (currently FSF GCC 4.9)
+## Notes on Bourne Shell Scripting
 
-Variables
- * build machine toolchain versions of all components (gcc, gas, ld, libc)
- * configure options
-
-Features:
----------
- * Build with downloaded binaries or build them all locally
- * Has default configuration for all components
- * All info recorded into an SQL database
- * Ability to mix & match all toolchain components
- * Test locally or remotely
- * Queue jobs for LAVA
- * Lists possible versions and components for build
-
-abe command line arguments:
--------------------------------
- * --build (architecture for the build machine, default native)
- * --target (architecture for the target machine, default native)
- * --snapshots XXX (URL of remote host or local directory)
- * --libc {newlib,eglibc,glibc} (C library to use)
- * --list {gcc,binutils,libc} (list possible values for component versions)
- * --set {gcc,binutils,libc,latest}=XXX (change config file setting)
- * --binutils (binutils version to use, default $PATH)
- * --gcc (gcc version to use, default $PATH)
- * --config XXX (alternate config file)
- * --clean (clean a previous build, default is to start where it left off)
- * --dispatch (run on LAVA build farm, probably remote)
- * --sysroot XXX (specify path to alternate sysroot)
-
-
-General ideas
--------------
-Use a shell script as config file, ala *.conf and set global
-variables or custom functions. A good naming convention to avoid
-collisions is important. It should be able to be download from a
-remote host. 
-
-Rather than Makefiles, it should use bourne shell scripts for more
-functionality. Both Android and Chromium use this technique.
-
-Each project that needs to be built should have a file that lists it's
-major build time dependancies. There should be defaults for all
-targets, but values can be overridden with local config files. The
-config data could also potentially live in a database. The config data
-is recorded into the database for each build and test run.
-
-Cross building G++ is complex, there is a stage 1 build of the
-compiler, which is only used to build the C library. Then the C
-library is compiled. After that G++ can be built.
- 
-Analysis
---------
-
-The main goal is to have the appropriate data accessible to support
-charting it in various ways to assist in better understanding of the
-quality of each toolchain component. This will assist developers in
-determining if their changes improve or degrade the component's
-quality. This will also allow others to get an overview of each
-component's quality, which will support product releases and
-management planning.
-
- * Plot a test run of a specific version of a component across all
-   supported platforms
- * Plot a test case of a component across all supported platforms
- * Plot a test case of a component across a list of versions
- * Plot a component's PASS percentage across all supported platforms
- * Plot a component's PASS percentage across all supported platforms
-   and several versions.
- * Plot a component's FAIL percentage across all supported platforms
- * Plot a component's FAIL percentage across all supported platforms
-   and several versions.
- * Plot all test states as a percentage of total test results
- * Plot all test states of the actual totals for each
- * 
-CoreMark
- * Compiler and version
- * Operating Speed in Mhz
- * CoreMark/Mhz
- * CoreMark
- * CoreMark/Core
- * Parallel Execution
- * EEMBC
-
-EEMBC
- * TODO
-
-Spec CPU 2000
- * CINT
-  * Benchmark
-  * Reference Time
-  * Base Runtime
-  * Base Ratio
-  * Runtime
-  * Ratio
- * CFP
-  * Benchmark
-  * Reference Time
-  * Base Runtime
-  * Base Ratio
-  * Runtime
-  * Ratio
-
-Spec CPU 2006
- * Benchmark
- * Base Seconds
- * Base Ratio
- * Peak Seconds
- * Peak Ratio
-
-Notes on Bourne Shell Scripting
--------------------------------
-
-  These scripts use a few techniques in many places that relate to
+These scripts use a few techniques in many places that relate to
 shell functions. One is heavy use of bourne shell functions to reduce
 duplication, and make the code better organized. Any string echo'd by
 a function becomes it's return value. Bourne shell supports 2 types of
@@ -269,22 +159,23 @@ calls, these scripts all return 0 for success, and 1 for errors. This
 enables the calling function to trap errors, and handle them in a
 clean fashion.
 
-  A few good habits to mention, always enclose a sub shell execution
+A few good habits to mention, always enclose a sub shell execution
 in double quotes. If the returned string contains spaces, this
 preserves the data, otherwise it'll get truncated.
 
-  Another good habit is to always prepend a character when doing
+Another good habit is to always prepend a character when doing
 string comparisons. If one of the two strings is undefined, the script
 will abort. So always using "test x${foo} = xbar" prevents that.
 
-Adding support for a new target
--------------------------------
+## Adding support for a new target
+
 In order to add support for a missing target, one has to tell
 ABE about a few things peculiar to the target:
-- which libc to choose: in abe.sh, look for "powerpc" and add similar
+
+* which libc to choose: in abe.sh, look for "powerpc" and add similar
   handling code
-- select which languages to build: in config/gcc.conf, look for
+* select which languages to build: in config/gcc.conf, look for
   "powerpc" again for an example
-- convert the target name into the linux name when installing the
+* convert the target name into the linux name when installing the
   linux kernel headers: in lib/make.sh, look for powerpc again
  
