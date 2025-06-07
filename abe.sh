@@ -42,7 +42,7 @@ usage()
              [--set {gcc_override_configure}=XXX]
              [--set {gcc_patch_file}=XXX]
              [--set {languages}={c|c++|fortran|go|lto|objc|java|ada}]
-             [--set {libc}={glibc|eglibc|newlib}]
+             [--set {libc}={glibc|bionic|newlib}]
              [--set {multilib}={aprofile|rmprofile}]
              [--set {linker}={ld|gold}]
              [--set {packages}={toolchain|gdb|sysroot}]
@@ -51,7 +51,7 @@ usage()
              [--testcontainer [user@]ipaddress:ssh_port]
              [--timeout <timeout_value>]
              [--usage]
-             [{binutils|dejagnu|gcc|gdb|gdbserver|gmp|mpfr|mpc|eglibc|glibc|newlib|qemu}
+             [{binutils|dejagnu|gcc|gdb|gdbserver|gmp|mpfr|mpc|bionic|glibc|newlib|qemu}
                =<id|snapshot|url>[~branch][@revision]]]
 
 EOF
@@ -293,7 +293,7 @@ OPTIONS
                 The default set for most platforms is c, c++, go, fortran,
                 and lto.
 
-  --set		{libc}={glibc|eglibc|newlib}
+  --set		{libc}={glibc|bionic|newlib}
 
 		The default value is stored in lib/globals.sh.  This
 		setting overrides the default.  Specifying a libc
@@ -377,7 +377,7 @@ OPTIONS
 
   --usage	Display synopsis information.
 
-   [{binutils|dejagnu|gcc|gdb|gdbserver|gmp|mpfr|mpc|eglibc|glibc|newlib|qemu}=<id|snapshot|url>[~branch][@revision]]
+   [{binutils|dejagnu|gcc|gdb|gdbserver|gmp|mpfr|mpc|bionic|glibc|newlib|qemu}=<id|snapshot|url>[~branch][@revision]]
 
 		This option specifies a particular version of a package
 		that might differ from the default version in the
@@ -500,7 +500,7 @@ crosscheck_clibrary_target()
 	    ;;
 	*)
 	    case ${test_clibrary} in
-		glibc|eglibc|newlib)
+		glibc|bionic|newlib)
 		    ;;
 		*)
 		    error "Invalid clibrary ${test_clibrary}."
@@ -516,7 +516,7 @@ select_clibrary()
 {
     # Range check user input against supported C libraries.
     case "${clibrary}" in
-	glibc|eglibc|newlib)
+	glibc|bionic|newlib)
 	    notice "Using '${clibrary}' as the C library as directed by \"--set libc=${clibrary}\"."
 	    ;;
 	auto)
