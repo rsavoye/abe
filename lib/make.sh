@@ -44,8 +44,11 @@ build_all()
             # Build stage 1 of GCC, which is a limited C compiler used to compile
             # the C library.
             libc)
-                build ${clibrary}
-                build_all_ret=$?
+		# FIXME: don't try to build bionic, it's an extnal sysroot
+		if test x"${clibrary}" != "bionic"; then
+                    build ${clibrary}
+                    build_all_ret=$?
+		fi
                 ;;
             stage1)
                 build gcc stage1
