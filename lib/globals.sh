@@ -268,7 +268,8 @@ get_component_list()
 	    builds="${builds} expat python libiconv binutils stage1 libc stage2 gdb"
 	fi
 	if test "$(echo ${target} | grep -c -- -linux-)" -eq 1; then
-	    builds="${builds} gdbserver"
+	    # FIXME: gdbserver doesn't build for Android
+	    builds="${builds}" # gdbserver
 	else
 	    # "linux" is included in the depends line in infrastructure.conf,
 	    # but is only needed for linux targets. Therefore remove it for
