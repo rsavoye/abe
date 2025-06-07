@@ -1,6 +1,6 @@
 #!/bin/bash
 # 
-#   Copyright (C) 2016 Linaro, Inc
+#   Copyright (C) 2025 Seneca Software, Inc.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
