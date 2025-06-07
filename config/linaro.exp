@@ -1,0 +1,86 @@
+# The master configuration file should be here
+
+global env
+if {[info exists env(PREFIX_UNDER_TEST)]} {
+    set prefix "$env(PREFIX_UNDER_TEST)"
+    set flags ""
+    if {[info exists env(FLAGS_UNDER_TEST)]} {
+	set flags "$env(FLAGS_UNDER_TEST)"
+    }
+    if {[info exists env(SYSROOT_UNDER_TEST)]} {
+	set sysroot "$env(SYSROOT_UNDER_TEST)"
+	set flags "$flags --sysroot=$env(SYSROOT_UNDER_TEST)"
+    }
+
+    set GCC_UNDER_TEST "[set prefix]gcc $flags"
+    set GXX_UNDER_TEST "[set prefix]g++ $flags"
+    set GFORTRAN_UNDER_TEST "[set prefix]gfortran $flags"
+    set OBJC_UNDER_TEST "[set prefix]gcc $flags"
+    set GOC_UNDER_TEST "[set prefix]goc $flags"
+    set GNAT_UNDER_TEST "[set prefix]gnat $flags"
+}
+
+if {[info exists env(SYSROOT_UNDER_TEST)]} {
+    set native ""
+} else {
+    set native "native"
+}
+
+if {[info exists env(QEMU_CPU_UNDER_TEST)]} {
+    set qemu_cpu "$env(QEMU_CPU_UNDER_TEST)"
+} else {
+    set qemu_cpu "any"
+}
+
+case "$target_triplet" in { 
+    { "arm-*linux-gnueabi*" "armv[78]l-*linux-gnueabi*" "aarch64-*linux*" } {
+	case "$native" in {
+	    { native } {
+		set target_list { "tcwg-local" }
+	    }
+	    default {
+		if {[info exists env(ABE_TEST_CONTAINER)]} {
+		    set target_list { "abe-container" }
+		} else {
+		    set target_list { "qemu" }
+		}
+            }
+	}
+    }
+    { "arm-*-eabi*" } {
+	global SIM
+	# CPU and sysroot are set through the environment
+	set SIM "qemu-arm"
+	set target_list { "arm-qemu" } 
+    }
+    { "armeb-*-eabi*" } {
+	global SIM
+	# CPU and sysroot are set through the environment
+	set SIM "qemu-armeb"
+	set target_list { "arm-qemu" } 
+    }
+    { "aarch64*-*elf*" } {
+	set target_list { "v8model" }
+	set env(FOUNDATION_MODEL) "/home/tcwg-buildslave/snapshots-ref/Foundation_Platformpkg/models/Linux64_GCC-4.7/Foundation_Platform"
+    }
+    { "x86_64-*linux-gnu" "i686-*linux-gnu" } {
+	case "$native" in {
+	    { native } {
+		set target_list { "tcwg-local" }
+	    }
+	    default {
+		if {[info exists env(ABE_TEST_CONTAINER)]} {
+		    set target_list { "abe-container" }
+		} else {
+		    set target_list { "tcwg-local" }
+		}
+	    }
+	}
+    }
+    { "*linux-gnu*" } {
+	set target_list { "qemu" }
+    }
+    default {
+	puts "No target hardware for $target_triplet"
+    }
+}
