@@ -58,7 +58,7 @@ sign_tarball()
 {
 #    trace "$*"
 
-#    ssh -t abe@toolchain64 gpg --no-use-agent -q --yes --passphrase-file /home/abe/.config/abe/password --armor --sign --detach-sig --default-key abe "/home/abe/var/snapshots/gcc-linaro-${release}.tar.xz" scp abe@toolchain64:/home/abe/var/snapshots/gcc-linaro-${release}.tar.xz.asc $REL_DIR
+#    ssh -t abe@toolchain64 gpg --no-use-agent -q --yes --passphrase-file /home/abe/.config/abe/password --armor --sign --detach-sig --default-key abe "/home/abe/var/snapshots/gcc-unofficial-${release}.tar.xz" scp abe@toolchain64:/home/abe/var/snapshots/gcc-unofficial-${release}.tar.xz.asc $REL_DIR
 
     return 0
 }
@@ -75,8 +75,8 @@ release_binutils_src()
     # The new combined repository for binutils has GDB too, so we strip that off.
     local tag="$(create_release_tag ${binutils_version} | sed -e 's:-gdb::' -e 's:-binutils::')"
 
-    dryrun "mkdir -p /tmp/linaro.$$"
-    local destdir="/tmp/linaro.$$/${tag}"
+    dryrun "mkdir -p /tmp/unofficial.$$"
+    local destdir="/tmp/unofficial.$$/${tag}"
 
     # make a link with the correct name for the tarball's source directory
     dryrun "ln -sfnT ${srcdir} ${destdir}"
@@ -105,7 +105,7 @@ release_binutils_src()
     sanitize ${srcdir}
 
     local exclude="--exclude-vcs --exclude .gitignore --exclude .cvsignore --exclude .libs --exclude ${target}"
-    dryrun "tar Jcfh ${local_snapshots}/${tag}.tar.xz ${exclude} --directory=/tmp/linaro.$$ ${tag}/"
+    dryrun "tar Jcfh ${local_snapshots}/${tag}.tar.xz ${exclude} --directory=/tmp/unofficial.$$ ${tag}/"
 
     # Make the md5sum file for this tarball
     rm -f ${local_snapshots}/${tag}.tar.xz.asc
@@ -114,8 +114,6 @@ release_binutils_src()
     return 0
 }
 
-# From: https://wiki.linaro.org/WorkingGroups/ToolChain/GCC/ReleaseProcess
-# The output file name looks like this: gcc-linaro-4.8-2013.11.tar.xz.
 # The date is set by the --release option to Abe. This function is
 # only called with --tarsrc or --tarball.
 release_gcc_src()
@@ -128,10 +126,10 @@ release_gcc_src()
     fi
     local srcdir="$(get_component_srcdir ${gcc_version})"
     local builddir="$(get_component_builddir ${gcc_version})-stage2"
-    local tag="$(create_release_tag ${gcc_version} | sed -e 's:[-~]linaro-::' | tr '~' '-')"
-    local destdir="${local_builds}/linaro.$$/${tag}"
+    local tag="$(create_release_tag ${gcc_version} | sed -e 's:[-~]unofficial-::' | tr '~' '-')"
+    local destdir="${local_builds}/unofficial.$$/${tag}"
 
-    dryrun "mkdir -p ${local_builds}/linaro.$$"
+    dryrun "mkdir -p ${local_builds}/unofficial.$$"
     dryrun "ln -sfnT ${srcdir} ${destdir}"
 
     if test -d ${destdir}; then
@@ -150,7 +148,7 @@ release_gcc_src()
     install_gcc_docs ${destdir} ${builddir} 
 
     local exclude="--exclude-vcs --exclude .gitignore --exclude .cvsignore --exclude .libs"
-    dryrun "tar Jcfh ${local_snapshots}/${tag}.tar.xz ${exclude} --directory=/tmp/linaro.$$ ${tag}"
+    dryrun "tar Jcfh ${local_snapshots}/${tag}.tar.xz ${exclude} --directory=/tmp/unofficial.$$ ${tag}"
 
     # Make the md5sum file for this tarball
     rm -f ${local_snapshots}/${tag}.tar.xz.asc
@@ -159,7 +157,7 @@ release_gcc_src()
     # Clean up doc files created during the build
     rm -fr ${destdir}/INSTALL ${destdir}/MD5SUMS ${destdir}/gcc/doc/*.1  ${destdir}/gcc/doc/*.7
 
-    rm -fr ${local_builds}/linaro.$$
+    rm -fr ${local_builds}/unofficial.$$
     return 0
 }
 
@@ -203,7 +201,6 @@ install_gcc_docs()
     return 0
 }
 
-# Edit the ChangeLog.linaro file for this release
 # $1 - the destination directory for the release files
 # $2 - the tag or release string
 edit_changelogs()
@@ -244,25 +241,25 @@ edit_changelogs()
 	local verstr="$(echo "${tool}" | tr "[:lower:]" "[:upper:]") Linaro ${version}"
 	for i in ${clogs}; do
 	    # Don't do anything if the entry has already been updated.
-	    if test -e $i.linaro; then
-		if test "$(grep -c "${version}" $i.linaro)" -eq 1; then
+	    if test -e $i.unofficial; then
+		if test "$(grep -c "${version}" $i.unofficial)" -eq 1; then
 		    continue
 		fi
-     		mv $i.linaro /tmp/
+     		mv $i.unofficial /tmp/
 	    else
-		touch /tmp/ChangeLog.linaro
+		touch /tmp/ChangeLog.unofficial
 	    fi
-     	    echo "${date}  ${fullname}  <${email}>" >> $i.linaro
-     	    echo "" >> $i.linaro 
-	    echo "	${verstr} released." >> $i.linaro
-     	    echo "" >> $i.linaro
-     	    cat /tmp/ChangeLog.linaro >> $i.linaro
-     	    rm -f /tmp/ChangeLog.linaro
+     	    echo "${date}  ${fullname}  <${email}>" >> $i.unofficial
+     	    echo "" >> $i.unofficial 
+	    echo "	${verstr} released." >> $i.unofficial
+     	    echo "" >> $i.unofficial
+     	    cat /tmp/ChangeLog.unofficial >> $i.unofficial
+     	    rm -f /tmp/ChangeLog.unofficial
 	done
     fi
 }
 
-# From: https://wiki.linaro.org/WorkingGroups/ToolChain/GDB/ReleaseProcess
+# From: https://wiki.unofficial.org/WorkingGroups/ToolChain/GDB/ReleaseProcess
 # $1 - file name-version to grab from source code control.
 release_gdb_src()
 {
@@ -275,10 +272,10 @@ release_gdb_src()
     local srcdir="$(get_component_srcdir ${gdb_version})"
     # The new combined repository for GDB has Binutils too, so we strip that off.
     local tag="$(create_release_tag ${gdb_version} | sed -e 's:binutils-::')"
-    local destdir="/tmp/linaro.$$/${tag}"
+    local destdir="/tmp/unofficial.$$/${tag}"
 
     # make a link with the correct name for the tarball's source directory
-    dryrun "mkdir -p /tmp/linaro.$$"
+    dryrun "mkdir -p /tmp/unofficial.$$"
     dryrun "ln -sfnT ${srcdir} ${destdir}"
     
     # Update the GDB version
@@ -294,7 +291,7 @@ release_gdb_src()
     sanitize ${destdir}
 
     local exclude="--exclude-vcs --exclude .gitignore --exclude .cvsignore --exclude .libs"
-    dryrun "tar Jcfh ${local_snapshots}/${tag}.tar.xz ${exclude} --directory=/tmp/linaro.$$ ${tag}/"
+    dryrun "tar Jcfh ${local_snapshots}/${tag}.tar.xz ${exclude} --directory=/tmp/unofficial.$$ ${tag}/"
 
     # Make the md5sum file for this tarball
     rm -f ${local_snapshots}/${tag}.tar.xz.asc
@@ -351,15 +348,15 @@ sysroot_install_script()
 #!/bin/sh
 
 # make the top level directory
-if test ! -d /opt/linaro/; then
-  echo "This script will install this sysroot in /opt/linaro. Write permission"
+if test ! -d /opt/unofficial/; then
+  echo "This script will install this sysroot in /opt/unofficial. Write permission"
   echo "to /opt is required. The files will stay where they are, only a symbolic"
   echo "is created, which can be changed to swap sysroots at compile time."
   echo ""
 -  echo "Continue ? Hit any key..."
   read answer
 
-  mkdir -p /opt/linaro
+  mkdir -p /opt/unofficial
 fi
 
 # If it doesn't already exist, link to the sysroot path GCC will be using

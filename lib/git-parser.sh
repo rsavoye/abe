@@ -96,11 +96,11 @@
 #
 #   A full git url with branch and revision information, e.g.,
 #
-#      http://firstname.lastname@git.linaro.org/git/toolchain/gcc.git/linaro_4.9_branch@12345
+#      http://firstname.lastname@git.unofficial.org/git/toolchain/gcc.git/unofficial_4.9_branch@12345
 #
 #   A git repo identifier with branch and revision information:
 #
-#      gcc.git/linaro_4.9_branch@12345
+#      gcc.git/unofficial_4.9_branch@12345
 #
 # Examples:
 #
@@ -170,8 +170,8 @@ git_parser()
 	    tool)
 		# Strip service information and any trailing branch information.
 		local tool="$(echo ${in} | sed -e 's/lp://' -e 's:/.*::')"
-		# Strip superflous -linaro tags
-		local tool="$(echo ${tool} | sed -e 's:-linaro::')"
+		# Strip superflous -unofficial tags
+		local tool="$(echo ${tool} | sed -e 's:-unofficial::')"
 		echo ${tool}
 		;;
 	    *)

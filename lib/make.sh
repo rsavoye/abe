@@ -275,10 +275,10 @@ do_tarbin()
     # Delete any previous release files
     # First delete the symbolic links first, so we don't delete the
     # actual files
-    dryrun "rm -fr ${local_builds}/linaro.*/*-tmp ${local_builds}/linaro.*/runtime*"
-    dryrun "rm -f ${local_builds}/linaro.*/*"
+    dryrun "rm -fr ${local_builds}/unofficial.*/*-tmp ${local_builds}/unofficial.*/runtime*"
+    dryrun "rm -f ${local_builds}/unofficial.*/*"
     # delete temp files from making the release
-    dryrun "rm -fr ${local_builds}/linaro.*"
+    dryrun "rm -fr ${local_builds}/unofficial.*"
 
     if test x"${clibrary}" != x"newlib"; then
 	binary_runtime
@@ -733,7 +733,7 @@ make_check()
     fi
 
     # load the config file for Linaro build farms
-    export DEJAGNU=${topdir}/config/linaro.exp
+    export DEJAGNU=${topdir}/config/unofficial.exp
 
     # Run tests
     local checklog="${builddir}/check-${component}.log"

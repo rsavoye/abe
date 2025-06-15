@@ -260,7 +260,8 @@ get_component_list()
 	if is_host_mingw; then
 	    # As Mingw32 requires a cross compiler to be already built, so we
 	    # don't need to rebuild the sysroot.
-            builds="${builds} expat python libiconv binutils libc stage2 gdb"
+            # builds="${builds} expat python libiconv binutils libc stage2 gdb"
+            builds="${builds} expat python binutils libc stage2 gdb"
 	else
 	    # Non-mingw builds skip expat, python and libiconv, but
 	    # are here so that they are included in the manifest, so

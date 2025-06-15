@@ -192,10 +192,10 @@ create_release_version()
 
 	# return the version string array
 	local rtag="${branch}${revision}-${date}"
-	# when 'linaro' is part of the branch name, we get a duplicate
+	# when 'unofficial' is part of the branch name, we get a duplicate
 	# identifier, which we remove to be less confusing, as the tag name
 	# is long enough as it is...
-	local rtag="$(echo ${rtag} | sed -e 's:-linaro~linaro:~linaro:')"
+	local rtag="$(echo ${rtag} | sed -e 's:-unofficial~unofficial:~unofficial:')"
     else
 	local version="$(echo $1 | sed -e 's:[a-z\./-]*::' -e 's:-branch::' -e 's:^_::' | tr '_' '.' )"
 	if test x"${version}" = x; then
@@ -213,7 +213,7 @@ create_release_version()
 # Parse a version string and produce the proper output fields. This is
 # used when naming releases for both directories, tarballs, and
 # internal version numbers. The version string looks like
-# 'gcc.git/gcc-4.8-branch' or 'gcc-linaro-4.8-2013.09'
+# 'gcc.git/gcc-4.8-branch' or 'gcc-unofficial-4.8-2013.09'
 #
 # returns "version~branch@revision"
 create_release_tag()
@@ -244,7 +244,7 @@ create_release_tag()
     esac
 
     # Only expand ${version} if it exists, so we don't get a spurious '-'.
-    local rtag="${component}-linaro${version:+-${version}}"
+    local rtag="${component}-unofficial${version:+-${version}}"
     if test x"${release}" = x; then
 	local date="$(date --date="@${timestamp}" +%Y%m%d)"
 	if test x"${component}" = x"glibc"; then
@@ -257,7 +257,7 @@ create_release_tag()
     fi
 
     if test x"${release}" != x;then
-	rtag="$(echo ${rtag} | sed -e 's:~linaro/gcc-::' -e 's:~linaro-::')"
+	rtag="$(echo ${rtag} | sed -e 's:~unofficial/gcc-::' -e 's:~unofficial-::')"
     fi
 
     echo "$(echo ${rtag} | tr '/' '-' | sed -e 's:-none-:-:' -e 's:-unknown-:-:')"

@@ -569,7 +569,7 @@ binutils_src_tarball()
 	sanitize ${srcdir}
     fi
 
-    # from /linaro/snapshots/binutils.git/src-release: do-proto-toplev target
+    # from /unofficial/snapshots/binutils.git/src-release: do-proto-toplev target
     # Take out texinfo from a few places.
     local dirs="$(find ${srcdir} -name Makefile.in)"
     for d in ${dirs}; do
@@ -594,14 +594,14 @@ binutils_src_tarball()
 	    local binutils_version="$(echo ${binutils_version} | sed -e "s:-2.*:-${date}:")"
 	fi
 	local date="$(date --date="@${timestamp}" +%Y%m%d)"
-	local tag="${binutils_version}-linaro${revision}-${date}"
+	local tag="${binutils_version}-unofficial${revision}-${date}"
     else
-	local tag="binutils-linaro-${version}-${release}"
+	local tag="binutils-unofficial-${version}-${release}"
     fi
 
     dryrun "ln -s ${srcdir} ${local_builds}/${tag}"
 
-# from /linaro/snapshots/binutils-2.23.2/src-release
+# from /unofficial/snapshots/binutils-2.23.2/src-release
 #
 # NOTE: No double quotes in the below.  It is used within shell script
 # as VER="$(VER)"

@@ -158,13 +158,13 @@ extract()
 
     # FIXME: this is hopefully a temporary hack for tarballs where the
     # directory name versions doesn't match the tarball version. This means
-    # it's missing the -linaro-VERSION.YYYY.MM part.
+    # it's missing the -unofficial-VERSION.YYYY.MM part.
     local name="$(echo ${file} | sed -e 's:.tar\..*::')"
 
     # dryrun has to skip this step otherwise execution will always drop into
     # this leg.
     if test x"${dryrun}" != xyes -a ! -d ${srcdir}; then
-    	local dir2="$(echo ${name} | sed -e 's:-linaro::' -e 's:-201[0-9\.\-]*::')"
+    	local dir2="$(echo ${name} | sed -e 's:-unofficial::' -e 's:-201[0-9\.\-]*::')"
     	if test ! -d ${srcdir}; then
     	    dir2="${srcdir}/${dir2}"
     	    warning "${tarball} didn't extract to ${srcdir} as expected!"

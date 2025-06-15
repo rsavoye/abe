@@ -63,6 +63,11 @@ configure_build()
 	warning "No configure script in ${srcdir}!"
         # not all packages commit their configure script, so if it has autogen,
         # then run that to create the configure script.
+	# MPC and MPFR don't have autoen and also don't have the generated
+	# files, so we use our copy to generate them
+	if test ! -f ${srcdir}/autogen.sh; then
+	    cp ./autogen.sh ${srcdir}
+	fi
 	if test -f ${srcdir}/autogen.sh; then
 	    (cd ${srcdir} && ./autogen.sh)
 	fi
